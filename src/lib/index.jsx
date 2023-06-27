@@ -101,7 +101,6 @@ class SingleOtpInput extends PureComponent {
             hasErrored && errorStyle
           )}
           type={this.getType()}
-          maxLength="1"
           ref={this.input}
           disabled={isDisabled}
           value={value ? value : ''}
@@ -250,8 +249,16 @@ class OtpInput extends Component {
 
   // The content may not have changed, but some input took place hence change the focus
   handleOnInput = (e) => {
-    if (this.isInputValueValid(e.target.value)) {
+    let value = e.target.value;
+    if (this.isInputValueValid(value)) {
       this.focusNextInput();
+    } else if (value && value.trim().length > 1) {
+      // This is a workaround for dealing mobile chrome does not fire onPaste event from sms auto-populate.
+
+      e.clipboardData = {
+        getData: () => value.trim(),
+      };
+      this.handleOnPaste(e);
     } else {
       // This is a workaround for dealing with keyCode "229 Unidentified" on Android.
 
